@@ -293,7 +293,7 @@ def quadratic_svm_report(data_train, labels_train):
     data_trainpca = data_train
     print("Plotting minDCF graphs ...")
     C = numpy.logspace(-4, 1, 10)
-    for i in range(2):  # raw, pca7
+    for i in range(2):
         y5, y1, y9 = [], [], []
         title = "raw"
         if i > 0:
@@ -337,7 +337,7 @@ def quadratic_svm_report(data_train, labels_train):
             f"5-folds / {title} / unbalanced",
             type="poly",
         )
-    for i in range(2):  # raw, pca7
+    for i in range(2):
         y5, y1, y9 = [], [], []
         title = "raw"
         if i > 0:
@@ -384,29 +384,31 @@ def quadratic_svm_report(data_train, labels_train):
         )
     print("Done.")
     print("# # 5-folds")
-    for i in range(2):  # raw, pca7
+    for i in range(2):
         print(f"# PCA m = {data_train.shape[0] - i}" if i > 0 else "# RAW")
         if i > 0:
             PCA_ = utils.PCA(data_train, data_train.shape[0] - i)
             data_trainpca = PCA_[0]
-        print("RBF SVM(C = 1e-1, γ = 1e-3)")
+        elif i == 0:
+            data_trainpca = data_train
+        print("RBF SVM(C = 1e1, γ = 1e-3)")
         for prior in priors:
             minDCF = utils.kfolds(
                 data_trainpca,
                 labels_train,
                 prior,
                 model,
-                ("RBF", priors[0], False, 1, 1e-1, 0, 0, 1e-3),
+                ("RBF", priors[0], False, 1, 1, 0, 0, 1e-3),
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
-        print("Poly SVM(C = 1e-3, c = 1, d = 2)")
+        print("Poly SVM(C = 1e-1, c = 1, d = 2)")
         for prior in priors:
             minDCF = utils.kfolds(
                 data_trainpca,
                 labels_train,
                 prior,
                 model,
-                ("poly", priors[0], False, 1, 1e-3, 1, 2, 0),
+                ("poly", priors[0], False, 1, 1e-1, 1, 2, 0),
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
     print("\n\n")
@@ -496,8 +498,8 @@ if __name__ == "__main__":
     #plot_features(data_train, labels_train)
     #gaussian_classifier_report(data_train, labels_train)
     #logistic_regression_report(data_train, labels_train)
-    linear_svm_report(data_train, labels_train)
-    #quadratic_svm_report(data_train, labels_train)
+    #linear_svm_report(data_train, labels_train)
+    quadratic_svm_report(data_train, labels_train)
     #gmm_report(data_train, labels_train)
     #utils.plot_LDA(data_train, labels_train)
     #utils.plot_scatter(data_train, labels_train)
