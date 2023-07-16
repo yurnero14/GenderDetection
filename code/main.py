@@ -491,7 +491,8 @@ if __name__ == "__main__":
     #logistic_regression_report(data_train, labels_train)
     #linear_svm_report(data_train, labels_train)
     #quadratic_svm_report(data_train, labels_train)
-    gmm_report(data_train, labels_train)
+    #gmm_report(data_train, labels_train)
+    utils.plot_LDA(data_train, labels_train)
     # score_calibration_report(data_train, labels_train)
     # evaluation_report(data_train, labels_train, data_test, lables_test)
 

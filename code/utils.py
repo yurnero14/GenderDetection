@@ -131,6 +131,38 @@ def LDA(data, labels, m):
     W = U[:, ::-1][:, 0:m]
     return numpy.dot(W.T, data), W
 
+def plot_LDA(data, labels, defPath=""):
+    LL, _W = LDA(data, labels, 1)
+    L0 = LL[:, labels == 0]
+    L1 = LL[:, labels == 1]
+    for i in range(data.shape[0]):
+        fig = plt.figure()
+        plt.title(labels[i])
+        plt.hist(
+            L0[i, :],
+            bins=90,
+            density=True,
+            alpha=0.7,
+            facecolor="red",
+            label="Male",
+            edgecolor="darkorange",
+        )
+        plt.hist(
+            L1[i, :],
+            bins=90,
+            density=True,
+            alpha=0.7,
+            facecolor="blue",
+            label="Female",
+            edgecolor="royalblue",
+        )
+        plt.legend(loc="best")
+        plt.savefig(
+            defPath + "data/Featuress/%s_%data.jpg",
+            dpi=300,
+            bbox_inches="tight",
+        )
+        plt.close(fig)
 
 def assign_labels(scores, pi, Cfn, Cfp, th=None):
     if th is None:
@@ -205,18 +237,18 @@ def plot_features(data_train, labels_train, name, defPath="", bin=90):
     D0 = data_train[:, labels_train == 0]
     D1 = data_train[:, labels_train == 1]
     labels = {
-        0: "Mean of the integrated profile",
-        1: "Standard deviation of the integrated profile",
-        2: "Excess kurtosis of the integrated profile",
-        3: "Skewness of the integrated profile",
-        4: "Mean of the DM-SNR curve",
-        5: "Standard deviation of the DM-SNR curve",
-        6: "Excess kurtosis of the DM-SNR curve",
-        7: "Skewness of the DM-SNR curve",
-        8: "Could be anything",
-        9: "Could be anything 9",
-        10:"Could be anything 10",
-        11: "Could be anything 11"
+        0: "First Dataset Feature",
+        1: "Second Dataset Feature",
+        2: "Third Dataset Feature",
+        3: "Fourth Dataset Feature",
+        4: "Fifth Dataset Feature",
+        5: "Sixth Dataset Feature",
+        6: "Seventh Dataset Feature",
+        7: "Eighth Dataset Feature",
+        8: "Ninth Dataset Feature",
+        9: "Tenth Dataset Feature",
+        10:"Eleventh Dataset Feature",
+        11: "Twelfth Dataset Feature"
     }
     for i in range(data_train.shape[0]):
         fig = plt.figure()
