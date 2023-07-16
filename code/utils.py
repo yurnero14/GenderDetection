@@ -11,6 +11,7 @@ def load_dataset_shuffle(filename1, filename2, features):
     with (open(filename1, "r")) as f:
         for line in f:
             attr = line.split(",")[0:features]
+           #print(attr)
             attr = numpy.array([i for i in attr])
             attr = vcol(attr)
             clss = line.split(",")[-1].strip()
@@ -20,6 +21,7 @@ def load_dataset_shuffle(filename1, filename2, features):
     data_trainmean = empirical_mean(data_train)
     data_trainstd = vcol(numpy.std(data_train, axis=1))
     data_train = (data_train - data_trainmean) / data_trainstd
+
     labels_train = numpy.array(lList, dtype=numpy.int32)
 
     with (open(filename2, "r")) as f:
@@ -43,7 +45,6 @@ def load_dataset_shuffle(filename1, filename2, features):
     return shuffle_dataset(data_train, labels_train), shuffle_dataset(
         data_test, labels_test
     )
-
 
 def shuffle_dataset(data, labels):
     numpy.random.seed(0)
@@ -158,7 +159,7 @@ def plot_LDA(data, labels, defPath=""):
         )
         plt.legend(loc="best")
         plt.savefig(
-            defPath + "data/Featuress/%s_%data.jpg",
+            defPath + "data/Featuress/LDA.jpg",
             dpi=300,
             bbox_inches="tight",
         )
@@ -278,6 +279,29 @@ def plot_features(data_train, labels_train, name, defPath="", bin=90):
             bbox_inches="tight",
         )
         plt.close(fig)
+
+def plot_scatter(data, labels, defPath=""):
+    male = data[:, labels == 0]
+    female = data[:, labels == 1]
+
+    plt.figure()
+    plt.scatter(male[9, :], male[5, :], label="Male")
+    plt.scatter(female[9, :], female[5, :], label="Female")
+    plt.legend()
+    plt.savefig(
+       defPath + "data/Featuress/feature_9_and_5_splot.jpg"
+     )
+    plt.tight_layout()
+
+    plt.figure()
+    plt.scatter(male[2, :], male[4, :], label="Male")
+    plt.scatter(female[2, :], female[4, :], label="Female")
+    plt.legend()
+    plt.savefig(
+        defPath + "data/Featuress/feature_2_and_4_splot.jpg"
+    )
+    plt.tight_layout()
+
 
 def plot_correlations(data_train, labels_train, defPath=""):
     cmap = ["Greys", "Greens", "Blues"]
