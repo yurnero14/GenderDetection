@@ -126,7 +126,7 @@ def logistic_regression_report(data_train, labels_train):
     data_trainpca = data_train
     print("Plotting minDCF graphs")
     l = numpy.logspace(-5, 1, 10)
-    for i in range(3):  # raw, pca7, pca6
+    for i in range(3):
         y5, y1, y9 = [], [], []
         title = "raw"
         if i > 0:
@@ -154,11 +154,13 @@ def logistic_regression_report(data_train, labels_train):
         )
     print("Done.")
     print("# # 5-folds")
-    for i in range(3):  # raw, pca7, pca6
+    for i in range(3):
         print(f"# PCA m = {data_train.shape[0] - i}" if i > 0 else "# RAW")
         if i > 0:
             PCA_ = utils.PCA(data_train, data_train.shape[0] - i)
             data_trainpca = PCA_[0]
+        elif i==0:
+            data_trainpca = data_train
         print("LogReg(λ = 1e-5, πT = 0.5)")
         for prior in priors:
             minDCF = utils.kfolds(
@@ -177,6 +179,7 @@ def logistic_regression_report(data_train, labels_train):
                 data_trainpca, labels_train, prior, model, (1e-5, priors[2])
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
+
     print("\n\n")
 
 
@@ -191,9 +194,9 @@ def linear_svm_report(data_train, labels_train):
     for mode in ["unbalanced", "balanced"]:
         for i in priors:
             y5, y1, y9 = [], [], []
-            PCA_ = utils.PCA(data_train, 11)
-            data_trainpca = PCA_[0]
-            title = f"pca7"
+            ##PCA_ = utils.PCA(data_train, 11)
+            data_trainpca = data_train
+            title = f"raw"
             for iC in C:
                 y5.append(
                     utils.kfolds(
@@ -234,49 +237,52 @@ def linear_svm_report(data_train, labels_train):
                 break
     print("Done.")
     print("5-folds")
-    for i in range(2):  # raw, pca7
+    for i in range(2):
         print(f"# PCA m = {data_train.shape[0] - i}" if i > 0 else "# RAW")
         if i > 0:
             PCA_ = utils.PCA(data_train, data_train.shape[0] - i)
             data_trainpca = PCA_[0]
-        print("Linear SVM(C = 1e-1)")
+        elif i==0:
+            data_trainpca = data_train
+        print("Linear SVM(C = 1e1)")
+
         for prior in priors:
             minDCF = utils.kfolds(
                 data_trainpca,
                 labels_train,
                 prior,
                 model,
-                ("linear", priors[0], False, 1, 1e-2),
+                ("linear", priors[0], False, 1, 1e1),
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
-        print("Linear SVM(C = 1e-1, πT = 0.5)")
+        print("Linear SVM(C = 1e1, πT = 0.5)")
         for prior in priors:
             minDCF = utils.kfolds(
                 data_trainpca,
                 labels_train,
                 prior,
                 model,
-                ("linear", priors[0], True, 1, 1e-2),
+                ("linear", priors[0], True, 1, 1e1),
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
-        print("Linear SVM(C = 1e-1, πT = 0.1)")
+        print("Linear SVM(C = 1e1, πT = 0.1)")
         for prior in priors:
             minDCF = utils.kfolds(
                 data_trainpca,
                 labels_train,
                 prior,
                 model,
-                ("linear", priors[1], True, 1, 1e-2),
+                ("linear", priors[1], True, 1, 1e1),
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
-        print("Linear SVM(C = 1e-1, πT = 0.9)")
+        print("Linear SVM(C = 1e1, πT = 0.9)")
         for prior in priors:
             minDCF = utils.kfolds(
                 data_trainpca,
                 labels_train,
                 prior,
                 model,
-                ("linear", priors[2], True, 1, 1e-2),
+                ("linear", priors[2], True, 1, 1e1),
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
     print("\n\n")
@@ -487,10 +493,10 @@ if __name__ == "__main__":
 
     (data_train, labels_train), (data_test, lables_test) = load_data()
 
-    plot_features(data_train, labels_train)
+    #plot_features(data_train, labels_train)
     #gaussian_classifier_report(data_train, labels_train)
     #logistic_regression_report(data_train, labels_train)
-    #linear_svm_report(data_train, labels_train)
+    linear_svm_report(data_train, labels_train)
     #quadratic_svm_report(data_train, labels_train)
     #gmm_report(data_train, labels_train)
     #utils.plot_LDA(data_train, labels_train)
