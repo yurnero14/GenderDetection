@@ -487,14 +487,14 @@ if __name__ == "__main__":
 
     (data_train, labels_train), (data_test, lables_test) = load_data()
 
-    #plot_features(data_train, labels_train)
+    plot_features(data_train, labels_train)
     #gaussian_classifier_report(data_train, labels_train)
     #logistic_regression_report(data_train, labels_train)
     #linear_svm_report(data_train, labels_train)
     #quadratic_svm_report(data_train, labels_train)
     #gmm_report(data_train, labels_train)
     #utils.plot_LDA(data_train, labels_train)
-    utils.plot_scatter(data_train, labels_train)
+    #utils.plot_scatter(data_train, labels_train)
     # score_calibration_report(data_train, labels_train)
     # evaluation_report(data_train, labels_train, data_test, lables_test)
 
