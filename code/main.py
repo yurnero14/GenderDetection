@@ -420,6 +420,7 @@ def gmm_report(data_train, labels_train):
     print("GMM report:")
     model = GMM.GMM()
     data_trainpca = data_train
+
     print("Plotting minDCF graphs ...")
     components = [2, 4, 8, 16, 32]
     for type in ["full", "tied", "diag"]:
@@ -449,17 +450,20 @@ def gmm_report(data_train, labels_train):
             utils.plot_minDCF_gmm(
                 components, y5, y1, y9, f"{type}_{title}", f"gmm {type}-cov / {title}"
             )
+
     print("Done.")
     print("# # 5-folds")
-    for i in range(2):  # raw, pca7
+    for i in range(2):
         print(f"# PCA m = {data_train.shape[0] - i}" if i > 0 else "# RAW")
         if i > 0:
             PCA_ = utils.PCA(data_train, data_train.shape[0] - i)
             data_trainpca = PCA_[0]
-        print("GMM Full (8 components)")
+        elif i==0:
+            data_trainpca = data_train
+        print("GMM Full (4 components)")
         for prior in priors:
             minDCF = utils.kfolds(
-                data_trainpca, labels_train, prior, model, (8, "full")
+                data_trainpca, labels_train, prior, model, (4, "full")
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
         print("GMM Diag (16 components)")
@@ -468,15 +472,227 @@ def gmm_report(data_train, labels_train):
                 data_trainpca, labels_train, prior, model, (16, "diag")
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
-        print("GMM Tied (32 components)")
+        print("GMM Tied (4 components)")
         for prior in priors:
             minDCF = utils.kfolds(
-                data_trainpca, labels_train, prior, model, (32, "tied")
+                data_trainpca, labels_train, prior, model, (4, "tied")
             )[0]
             print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
     print("\n\n")
 
 
+def score_calibration_report(data_train, labels_train):
+    print("Score calibration report:")
+    data_trainpca = data_train
+    print("Bayes Error Plot ...")
+    p = numpy.linspace(-3, 3, 15)
+    for model in [
+        (
+            GC.GaussianClassifier(),
+            ([priors[0], 1 - priors[0]], "MVG", True),
+            "tiedFullCov",
+            "Tied Full-Cov ",
+        ),
+        (
+            LR.LogisticRegression(),
+            (1e-5, priors[2]),
+            "LogReg",
+            "Logistic Regression / λ = 1e-5 ",
+        ),
+        (
+            SVM.SVM(),
+            ("linear", priors[0], False, 1, 1e1),
+            "SVM",
+            "Linear SVM / C = 10 ",
+        ),
+        (GMM.GMM(), (4, "tied"), "GMM", "Tied GMM / 4 components / "),
+    ]:
+        minDCF = []
+        actDCF = []
+        for iP in p:
+            iP = 1.0 / (1.0 + numpy.exp(-iP))
+            minDCFtmp, actDCFtmp = utils.kfolds(
+                data_trainpca, labels_train, iP, model[0], model[1]
+            )
+            minDCF.append(minDCFtmp)
+            actDCF.append(actDCFtmp)
+        utils.bayes_error_plot(p, minDCF, actDCF, model[2], model[3])
+    print("Done.")
+    print("Bayes Error Plot Calibrated ...")
+    p = numpy.linspace(-3, 3, 15)
+    for model in [
+        (
+            GC.GaussianClassifier(),
+            ([priors[0], 1 - priors[0]], "MVG", True),
+            "calibrated_tiedFullCov",
+            "calibrated Tied Full-Cov ",
+        ),
+        (
+            LR.LogisticRegression(),
+            (1e-5, priors[2]),
+            "calibrated_LogReg",
+            "calibrated  Logistic Regression / λ = 1e-5 ",
+        ),
+        (
+            SVM.SVM(),
+            ("linear", priors[0], False, 1, 1e1),
+            "calibrated_SVM",
+            "calibrated  Linear SVM / C = 1e1",
+        ),
+        (
+            GMM.GMM(),
+            (4, "tied"),
+            "calibrated_GMM",
+            "calibrated  Tied GMM / 4 comp",
+        ),
+    ]:
+        minDCF = []
+        actDCF = []
+        for iP in p:
+            iP = 1.0 / (1.0 + numpy.exp(-iP))
+            minDCFtmp, actDCFtmp = utils.kfolds(
+                data_trainpca, labels_train, iP, model[0], model[1], calibrated=True
+            )
+            minDCF.append(minDCFtmp)
+            actDCF.append(actDCFtmp)
+        utils.bayes_error_plot(p, minDCF, actDCF, model[2], model[3])
+    print("Done.")
+    print("# # 5-folds")
+    for i in range(2):
+        print(f"# PCA m = {data_train.shape[0] - i}" if i > 0 else "# RAW")
+        if i > 0:
+            PCA_ = utils.PCA(data_train, data_train.shape[0] - i)
+            data_trainpca = PCA_[0]
+        elif i==0:
+            data_trainpca= data_train
+        print("Tied Full-Cov")
+        for prior in priors:
+            minDCF, actDCF = utils.kfolds(
+                data_trainpca,
+                labels_train,
+                prior,
+                GC.GaussianClassifier(),
+                ([priors[0], 1 - priors[0]], "MVG", True),
+                calibrated=True,
+            )
+            print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
+            print(f"- with prior = {prior} -> actDCF = %.3f" % actDCF)
+        print("LogReg(λ = 1e-5, πT = 0.9)")
+        for prior in priors:
+            minDCF, actDCF = utils.kfolds(
+                data_trainpca,
+                labels_train,
+                prior,
+                LR.LogisticRegression(),
+                (1e-5, priors[2]),
+                calibrated=True,
+            )
+            print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
+            print(f"- with prior = {prior} -> actDCF = %.3f" % actDCF)
+        print("Linear SVM(C = 1e1, πT = 0.5)")
+        for prior in priors:
+            minDCF, actDCF = utils.kfolds(
+                data_trainpca,
+                labels_train,
+                prior,
+                SVM.SVM(),
+                ("linear", priors[0], False, 1, 1e1),
+                calibrated=True,
+            )
+            print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
+            print(f"- with prior = {prior} -> actDCF = %.3f" % actDCF)
+        print("GMM TIed Cov(4 components)")
+        for prior in priors:
+            minDCF, actDCF = utils.kfolds(
+                data_trainpca,
+                labels_train,
+                prior,
+                GMM.GMM(),
+                (4, "tied"),
+                calibrated=True,
+            )
+            print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
+            print(f"- with prior = {prior} -> actDCF = %.3f" % actDCF)
+    print("\n\n")
+
+
+# # Evaluation
+def evaluation_report(data_train, labels_train, data_test, lables_test):
+    print("Evaluation report:")
+    data_trainpca = data_train
+    data_testpca = data_test
+    calibratedScores = []
+    for model in [
+        (
+            GC.GaussianClassifier().trainClassifier(
+                data_trainpca, labels_train, *([priors[0], 1 - priors[0]], "MVG", True)
+            ),
+            "Tied Full-Cov",
+        ),
+        (
+            LR.LogisticRegression().trainClassifier(
+                data_trainpca, labels_train, *(1e-5, priors[2])
+            ),
+            "LogReg(λ = 1e-5, πT = 0.9)",
+        ),
+        (
+            SVM.SVM().trainClassifier(
+                data_trainpca, labels_train, *("linear", priors[0], False, 1, 1e1)
+            ),
+            "Linear SVM(C = 1e1)",
+        ),
+        (
+            GMM.GMM().trainClassifier(data_trainpca, labels_train, *(4, "tied")),
+            "GMM Tied Cov (4 components)",
+        ),
+    ]:
+        alpha, beta = utils.compute_calibrated_scores_param(
+            model[0].computeLLR(data_trainpca), labels_train
+        )
+        scores = (
+            alpha * model[0].computeLLR(data_testpca)
+            + beta
+            - numpy.log(priors[0] / (1 - priors[0]))
+        )
+        print(model[1])
+        for prior in priors:
+            minDCF = utils.minDCF(scores, lables_test, prior, 1, 1)
+            actDCF = utils.actDCF(scores, lables_test, prior, 1, 1)
+            print(f"- with prior = {prior} -> minDCF = %.3f" % minDCF)
+            print(f"- with prior = {prior} -> actDCF = %.3f" % actDCF)
+        calibratedScores.append(scores)
+    utils.plot_ROC(
+        zip(
+            calibratedScores,
+            [
+                "Tied Full-Cov",
+                "LogReg(λ = 1e-5, πT = 0.9)",
+                "Linear SVM(C = 1e1)",
+                "GMM Tied Full Cov (4 components)",
+            ],
+            ["r", "b", "g", "darkorange"],
+        ),
+        lables_test,
+        "calibrated_classifiers",
+        "calibrated ",
+    )
+    utils.plot_DET(
+        zip(
+            calibratedScores,
+            [
+                "Tied Full-Cov",
+                "LogReg(λ = 1e-5, πT = 0.9)",
+                "Linear SVM(C = 1e1)",
+                "GMM Tied Full Cov (4 components)",
+            ],
+            ["r", "b", "g", "darkorange"],
+        ),
+        lables_test,
+        "calibrated_classifiers",
+        "calibrated ",
+    )
+    print("Done.")
+    print("\n\n")
 
 
 # # Gaussian classifiers
@@ -499,11 +715,11 @@ if __name__ == "__main__":
     #gaussian_classifier_report(data_train, labels_train)
     #logistic_regression_report(data_train, labels_train)
     #linear_svm_report(data_train, labels_train)
-    quadratic_svm_report(data_train, labels_train)
+    #quadratic_svm_report(data_train, labels_train)
     #gmm_report(data_train, labels_train)
     #utils.plot_LDA(data_train, labels_train)
     #utils.plot_scatter(data_train, labels_train)
-    # score_calibration_report(data_train, labels_train)
-    # evaluation_report(data_train, labels_train, data_test, lables_test)
+    #score_calibration_report(data_train, labels_train)
+    evaluation_report(data_train, labels_train, data_test, lables_test)
 
     print("\n\n ------ END ------")

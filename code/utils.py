@@ -228,7 +228,7 @@ def compute_rates_values(scores, labels):
 
 def compute_calibrated_scores_param(scores, labels):
     scores = vrow(scores)
-    model = LR.LogisticRegression().trainClassifier(scores, labels, 1e-4, 0.5)
+    model = LR.LogisticRegression().trainClassifier(scores, labels, 1e-5, 0.5)
     alpha = model.w
     beta = model.b
     return alpha, beta
@@ -461,7 +461,7 @@ def bayes_error_plot(p, minDCF, actDCF, filename, title, defPath=""):
     plt.xlabel("prior")
     plt.ylabel("minDCF")
     plt.legend(loc="best")
-    plt.savefig(defPath + "img/bep/bep_%s.jpg" % filename, dpi=300, bbox_inches="tight")
+    plt.savefig(defPath + "data/ScoreCalibration/bep_%s.jpg" % filename, dpi=300, bbox_inches="tight")
     plt.close(fig)
 
 
@@ -475,7 +475,7 @@ def plot_ROC(results, labels_test, filename, title, defPath=""):
     plt.ylabel("True Positive Rate")
     plt.legend(loc="best")
     plt.savefig(
-        defPath + "img/eval/roc_%s.jpg" % filename, dpi=300, bbox_inches="tight"
+        defPath + "data/Evaluation/roc_%s.jpg" % filename, dpi=300, bbox_inches="tight"
     )
     plt.close(fig)
 
@@ -490,6 +490,6 @@ def plot_DET(results, labels_test, filename, title, defPath=""):
     plt.ylabel("False Negative Rate")
     plt.legend(loc="best")
     plt.savefig(
-        defPath + "img/eval/det_%s.jpg" % filename, dpi=300, bbox_inches="tight"
+        defPath + "data/Evaluation/det_%s.jpg" % filename, dpi=300, bbox_inches="tight"
     )
     plt.close(fig)
