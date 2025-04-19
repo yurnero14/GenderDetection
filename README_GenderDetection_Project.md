@@ -64,6 +64,6 @@ The dataset contains:
 
 3. Run training and evaluation:
    ```bash
-   python 
+   python main.py
    ```
 
