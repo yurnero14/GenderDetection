@@ -49,15 +49,6 @@ The dataset contains:
 - GMM models provided best performance across minDCF and actDCF
 - Score calibration substantially improved model reliability
 
-## 📁 Structure
-
-```
-├── data/                 # Preprocessed and raw dataset files
-├── src/                  # Training and evaluation scripts
-├── results/              # Score files, plots, evaluation metrics
-└── report/               # Project report (PDF)
-```
-
 ## 🚀 How to Run
 
 1. Clone the repository:
@@ -73,11 +64,6 @@ The dataset contains:
 
 3. Run training and evaluation:
    ```bash
-   python src/train_and_evaluate.py
+   python 
    ```
 
-## 📬 Contact
-
-For inquiries or collaboration, reach out via [LinkedIn](https://www.linkedin.com/in/your-link) or GitHub.
-
----
